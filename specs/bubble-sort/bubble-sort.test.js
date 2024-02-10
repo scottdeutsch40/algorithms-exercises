@@ -11,12 +11,33 @@
 */
 
 function bubbleSort(nums) {
-  // code goes here
-}
+  //initialize variable to check if a sorting happened
+  let didSort = true;
 
+  //while didSort is true
+  while (didSort){
+    //set didSort to false
+    didSort = false;
+    //loop over the array
+    for (let i = 0; i < nums.length - 1; i++){
+      //if the current number is less than the next number
+      if (nums[i] > nums[i+1]){
+        //swap those numbers
+        [nums[i], nums[i+1]] = [nums[i+1], nums[i]];
+
+        //set didSort to true
+        didSort = true;
+      }
+    }
+  }
+    
+  //return nums
+  return nums
+}
+// console.log(bubbleSort([1,4,3,5,2]))
 // unit tests
 // do not modify the below code
-test.skip("bubble sort", function () {
+test("bubble sort", function () {
   const nums = [10, 5, 3, 8, 2, 6, 4, 7, 9, 1];
   const sortedNums = bubbleSort(nums);
   expect(sortedNums).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);

@@ -4,23 +4,56 @@ import { TreeViz } from "./tree-visualizer";
 import _ from "lodash";
 
 class Tree {
-  add(num) {
-    // needs this
+  constructor() {
+    this.root = null;
   }
-  toObject() {
-    // returns a root node with
-    // {
-    //   value:  <number>
-    //   left:   <object>
-    //   right:  <object>
-    //   height: <number, optional>
-    // }
-    return { value: 1, left: null, right: null, height: 1 };
+  add(value) {
+    const node = new Node(value);
+    //some logic if this is the root
+    if (!this.root){
+      this.root = node;
+    }
+
+    //find the correct place to add
+    else{
+      let leaf = this.root;
+      while (true){
+        if (value > leaf.value){
+          if (leaf.right){
+            leaf = leaf.right;
+            continue;
+          } else {
+            leaf.right = node;
+            break;
+          }
+        } else {
+          if (leaf.left){
+            leaf = leaf.left;
+            continue;
+          } else {
+            leaf.left = node;
+            break;
+          }
+        }
+      }
+    }
+  }
+  toObject () {
+    return this.root;
+  }
+}
+
+// you might consider using a Node class too
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
   }
 }
 
 export default function TreeComponent() {
-  const nums = _.shuffle(_.range(50));
+  const nums = _.shuffle(_.range(10));
   const tree = new Tree();
   nums.map((num) => tree.add(num));
   const objs = tree.toObject();
