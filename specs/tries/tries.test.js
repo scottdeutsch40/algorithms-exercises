@@ -12,27 +12,92 @@
 const { CITY_NAMES } = require("./cities.js");
 const _ = require("lodash"); // needed for unit tests
 
+// Node class for trie implementation
 class Node {
-  // you don't have to use this data structure, this is just how I did it
-  // you'll almost definitely need more methods than this and a constructor
-  // and instance variables
+  constructor(string) {
+    this.children = []; // Array to store child nodes
+    this.terminus = false; // Indicates if the node marks the end of a word
+    this.value = string[0] || ''; // Value of the node
+    if (string.length > 1) {
+      // If there are more characters in the string, create child nodes recursively
+      this.children.push(new Node(string.substr(1)));
+    } else {
+      // If it's the last character of the string, mark it as terminus
+      this.terminus = true;
+    }
+  }
+
+  // Method to add a string to the trie
+  add(string) {
+    const value = string[0];
+    const next = string.substr(1);
+    for (let i = 0; i < this.children.length; i++){
+      const child = this.children[i];
+      // Traverse the tree until the matching character is found
+      if (child.value === value) {
+        if (next) {
+          // If there are more characters in the string, continue adding recursively
+          child.add(next);
+        } else {
+          // If it's the last character of the string, mark it as terminus
+          child.terminus = true;
+        }
+        return;
+      }
+    }
+    // If there's no matching child node, create a new one
+    this.children.push(new Node(string));
+  }
+
+  // Method to complete a string based on the trie
+  _complete(search, built, suggestions){
+    if (suggestions.length >= 3 || (search && search[0] !== this.value)){
+      // Limiting suggestions to 3 or when the search string doesn't match the node value
+      return suggestions;
+    }
+
+    if (this.terminus) {
+      // If it's a terminus node, add the built string to suggestions
+      suggestions.push(built + this.value);
+    }
+
+    // Recursively complete the string
+    for (let i = 0; i < this.children.length; i++){
+      const child = this.children[i];
+      suggestions = child._complete(search.substr(1), built + this.value, suggestions)
+    }
+    return suggestions;
+  }
+
+  // Method to find completions of a string
   complete(string) {
-    return [];
+    let completions = [];
+    
+    for (let i = 0; i < this.children.length; i++) {
+      const child = this.children[i];
+      // Completing the string for each child node
+      completions = completions.concat(child._complete(string, '', []))
+    }
+    return completions;
   }
 }
 
+// Function to create a trie from an array of words
 const createTrie = (words) => {
-  // you do not have to do it this way; this is just how I did it
-  const root = new Node("");
+  const root = new Node(""); // Creating root node
 
-  // more code should go here
+  // Adding each word to the trie
+  for (let i = 0; i < words.length; i++){
+    const word = words[i];
+    root.add(word.toLowerCase());
+  }
 
   return root;
 };
 
 // unit tests
 // do not modify the below code
-describe.skip("tries", function () {
+describe("tries", function () {
   test("dataset of 10 – san", () => {
     const root = createTrie(CITY_NAMES.slice(0, 10));
     const completions = root.complete("san");
@@ -133,7 +198,7 @@ describe.skip("tries", function () {
   });
 });
 
-describe.skip("edge cases", () => {
+describe("edge cases", () => {
   test("handle whole words – seattle", () => {
     const root = createTrie(CITY_NAMES.slice(0, 30));
     const completions = root.complete("seattle");
